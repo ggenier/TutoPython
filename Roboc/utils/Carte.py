@@ -13,6 +13,8 @@ class Carte:
         self.planCarte = list()
         self.structureCarte=dict()
         self.caracterePrecedent=" "
+        self.nbColonneMax = 0
+        self.nbLigneMax = 0
 
     def chargeCarte(self, cheminCarte=None):
         """Charge la carte soit par le chemin donné, soit par celui donnée au constructeur"""
@@ -43,14 +45,27 @@ class Carte:
                 self.structureCarte[etage, ligne, colonne] = lettre
                 colonne+=1
 
+            self.nbLigneMax = ligne
             ligne+=1
+            self.nbColonneMax = colonne
             colonne=0
 
-    def changerPositionJoueur(self, anciennePosition, nouvellePosition):
+        self.nbColonneMax-=1
+        self.nbLigneMax -= 1
+
+    def getNbLigneMax(self):
+        return self.nbLigneMax
+
+    def getNbColonneMax(self):
+        return self.nbColonneMax
+
+    def changerPositionJoueur(self, anciennePosition, nouvellePosition, direction, nbDeplacement):
         """Déplace le joueur d'ancienne position vers nouvelle positions
         Si anciennePosition=None on cherche la position par défaut"""
 
         estSortie = False
+        deplacementAutorise = False  # Par défaut
+        caractereFuturPosition=" "
 
         if anciennePosition is not None:
             if anciennePosition[0] == 0 and anciennePosition[1] == 0 and anciennePosition[1] == 0 :
@@ -66,32 +81,115 @@ class Carte:
                     break
         else:
             #On recherche le point de départ pour reprendre où on c'est arrêté
-            if anciennePosition == nouvellePosition:
+            if anciennePosition == nouvellePosition and direction is None and nbDeplacement is None:
                 for position in self.structureCarte:
                     if self.structureCarte[position[0], position[1], position[2]] == 'X':
+                        nouvellePosition = anciennePosition
                         anciennePosition = (position[0], position[1], position[2])
+                        if str(self.structureCarte[nouvellePosition]).lower() != 'x':
+                            self.caracterePrecedent = self.structureCarte[nouvellePosition]
+                        else:
+                            self.structureCarte[nouvellePosition] = " "
+                        deplacementAutorise = True  # Par défaut
                         #On a trouvé, pas la peine de continuer
                         break
 
         #Mise en place de la nouvelle position
-        if anciennePosition is not None and nouvellePosition is not None :
-            #On contrôle si le déplacement est autorisé (pas de portes, pas de murs...)
-            caractereFuturPosition = self.structureCarte[nouvellePosition[0], nouvellePosition[1], nouvellePosition[2]]
+        if anciennePosition is not None:
+            #On controle si on a aucun mur sur le chemin
+            if direction is not None and nbDeplacement is not None:
+                i=1
+                while i <= int(nbDeplacement):
+                    #Déplacement vers le haut
+                    if str(direction).lower() == "n":
+                        ligneActuelle =  anciennePosition[1] - i
+                        if ligneActuelle > 0:
+                            nouvellePosition = (anciennePosition[0], anciennePosition[1]-i, anciennePosition[2])
+                            caractereFuturPosition = self.structureCarte[nouvellePosition]
+                            estSortie = self.estSortie(caractereFuturPosition)
+                            if estSortie == True:
+                                #Pas la peine de continuer
+                                deplacementAutorise = True
+                                break
+                            if self.deplacementAutorise(caractereFuturPosition):
+                                deplacementAutorise = True
+                            else:
+                                deplacementAutorise = False
+                        else:
+                            deplacementAutorise = False
 
-            if self.deplacementAutorise(caractereFuturPosition):
-                self.structureCarte[anciennePosition[0], anciennePosition[1], anciennePosition[2]] = self.caracterePrecedent
-                self.structureCarte[nouvellePosition[0], nouvellePosition[1], nouvellePosition[2]] = "X"
+                    if str(direction).lower() == "s":
+                        ligneActuelle =  anciennePosition[1]+i
+                        if ligneActuelle < self.nbLigneMax:
+                             nouvellePosition = (anciennePosition[0], anciennePosition[1]+i, anciennePosition[2])
+                             caractereFuturPosition = self.structureCarte[nouvellePosition]
+                             estSortie = self.estSortie(caractereFuturPosition)
+                             if estSortie == True:
+                                 # Pas la peine de continuer
+                                 deplacementAutorise = True
+                                 break
+                             if self.deplacementAutorise(caractereFuturPosition):
+                                deplacementAutorise = True
+                             else:
+                                deplacementAutorise = False
+                        else:
+                            deplacementAutorise = False
 
-                #On sauvegarde le caractere pour le remettre après, si ce n'est pas le joueur
-                if str(caractereFuturPosition).lower() != "x":
-                    self.caracterePrecedent = caractereFuturPosition
+                    if str(direction).lower() == "e":
+                        colonneActuelle =  anciennePosition[2]+i
+                        if colonneActuelle < self.nbColonneMax:
+                            nouvellePosition = (anciennePosition[0], anciennePosition[1], anciennePosition[2]+i)
+                            caractereFuturPosition = self.structureCarte[nouvellePosition]
+                            estSortie = self.estSortie(caractereFuturPosition)
+                            if estSortie == True:
+                                #Pas la peine de continuer
+                                deplacementAutorise = True
+                                break
+                            if self.deplacementAutorise(caractereFuturPosition):
+                                deplacementAutorise = True
+                            else:
+                                deplacementAutorise = False
+                        else:
+                            deplacementAutorise = False
 
+                        print(deplacementAutorise)
 
-            else:
-                #Si le deplacement n'est pas autorisé, on ne se déplace pas
-                nouvellePosition = anciennePosition
+                    if str(direction).lower() == "o":
+                        colonneActuelle =  anciennePosition[2]-i
+                        if colonneActuelle > 0:
+                            nouvellePosition = (anciennePosition[0], anciennePosition[1], anciennePosition[2]-i)
+                            caractereFuturPosition = self.structureCarte[nouvellePosition]
+                            estSortie = self.estSortie(caractereFuturPosition)
+                            if estSortie == True:
+                                #Pas la peine de continuer
+                                deplacementAutorise = True
+                                break
+                            if self.deplacementAutorise(caractereFuturPosition):
+                                deplacementAutorise = True
+                            else:
+                                deplacementAutorise = False
+                        else:
+                            deplacementAutorise = False
 
-            estSortie = self.estSortie(caractereFuturPosition)
+                    #Pas la peine d'aller plus loin
+                    if not deplacementAutorise:
+                        nouvellePosition = anciennePosition
+                        break
+
+                    i+=1
+
+            if deplacementAutorise:
+                if direction is not None and nbDeplacement is not None:
+                    # Déplacement autorisé et pas le début de partie
+                    self.structureCarte[anciennePosition[0], anciennePosition[1], anciennePosition[2]] = self.caracterePrecedent
+                    self.structureCarte[nouvellePosition[0], nouvellePosition[1], nouvellePosition[2]] = "X"
+                    # on sauvegarde le caractere pour le remettre après, si ce n'est pas le joueur
+                    if str(caractereFuturPosition).lower() != "x":
+                        self.caracterePrecedent = caractereFuturPosition
+                else:
+                    #Début de partie
+                    self.structureCarte[anciennePosition[0], anciennePosition[1], anciennePosition[2]] = " "
+                    self.structureCarte[nouvellePosition[0], nouvellePosition[1], nouvellePosition[2]] = "X"
 
         #On retourne la position du joueur, utile notamment pourle début de partie
         return estSortie, nouvellePosition

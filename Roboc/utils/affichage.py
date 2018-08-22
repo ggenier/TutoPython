@@ -8,9 +8,11 @@ def saisiePseudo():
 
 def afficherHisto(histo):
     """Affiche l'historique des coups joués"""
-    rang=1
+    rang=0
     for coups in histo:
-        print("Coups joué {} {} {} {}".format(rang, coups[0], coups[1], coups[2]))
+        #On saute le coup de départ
+        if rang != 0:
+            print("Coups joué {} {} {} {}".format(rang, coups[0], coups[1], coups[2]))
         rang+=1
 
 def affichageListeCarteEtSaisie(listeCarte):
@@ -89,7 +91,7 @@ def saisieDeplacement():
                 nombreDeplacement = deplacement[1:len(deplacement)]
                 if not nombreDeplacement.isnumeric():
                     print(
-                        "Le déplacement soit commencer par une direction : (n)ord, (s)ud, (e)st, (o)est, ou (Q)uitter.\n Il est possible d'ajouter un nombre de déplacement (facultatif)")
+                        "Le déplacement doit commencer par une direction : (n)ord, (s)ud, (e)st, (o)est, ou (Q)uitter.\n Il est possible d'ajouter un nombre de déplacement (facultatif)")
                     saisieValide = False
                 else:
                     saisieValide = True
@@ -101,6 +103,6 @@ def saisieDeplacement():
                 direction = 'Q'
             else:
                 print(
-                    "Le déplacement soit commencer par une direction : (n)ord, (s)ud, (e)st, (o)est, ou (Q)uitter.\n Il est possible d'ajouter un nombre de déplacement (facultatif)")
+                    "Le déplacement doit commencer par une direction : (n)ord, (s)ud, (e)st, (o)est, ou (Q)uitter.\n Il est possible d'ajouter un nombre de déplacement (facultatif)")
 
     return (direction, nombreDeplacement)

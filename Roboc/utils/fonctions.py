@@ -55,31 +55,3 @@ def chargerJoueur(repertoireSauvegarde, nomJoueur=None):
 
     return joueur
 
-def calculerNouvellePosition(positionJoueur, direction, nbDeplacement):
-    """Fonction de calcul de la nouvelle position du joueur sous la forme de tuple
-    etage, ligne, colonne
-    La fonction ne déplce pas le joueur
-    La fonction ne controle pas la validité du déplacement dans le plan
-    Elle teste uniquement pour ne pas passer sous les -1 au nord ou a l'ouest.
-    """
-    etage = positionJoueur[0]
-    ligne = positionJoueur[1]
-    colonne = positionJoueur[2]
-
-    if str(direction).lower() == 'n':
-        ligne-=int(nbDeplacement)
-        if ligne < 0:
-            ligne = 0
-
-    if str(direction).lower() == 's':
-        ligne+=int(nbDeplacement)
-
-    if str(direction).lower() == 'e':
-        colonne+=int(nbDeplacement)
-
-    if str(direction).lower() == 'o':
-        colonne-=int(nbDeplacement)
-        if colonne < 0:
-            colonne = 0
-
-    return (etage, ligne, colonne)
