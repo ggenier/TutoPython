@@ -152,8 +152,6 @@ class Carte:
                         else:
                             deplacementAutorise = False
 
-                        print(deplacementAutorise)
-
                     if str(direction).lower() == "o":
                         colonneActuelle =  anciennePosition[2]-i
                         if colonneActuelle > 0:
@@ -192,7 +190,7 @@ class Carte:
                     self.structureCarte[nouvellePosition[0], nouvellePosition[1], nouvellePosition[2]] = "X"
 
         #On retourne la position du joueur, utile notamment pourle début de partie
-        return estSortie, nouvellePosition
+        return estSortie, deplacementAutorise, nouvellePosition
 
 
     def deplacementAutorise(self, caractereFuturPosition):

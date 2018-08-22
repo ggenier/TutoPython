@@ -3,8 +3,13 @@
 """Fonctions de gestion de l'affichage, menu, carte, saisie choix..."""
 
 def saisiePseudo():
+    """Saisie du pseudo"""
     pseudo = input("Saisir votre pseudo vide pour quitter) : ")
     return pseudo
+
+def deplacementImpossible():
+    """"Indique que le déplacement n'est pas possible"""
+    print("Déplacement demandé impossible")
 
 def afficherHisto(histo):
     """Affiche l'historique des coups joués"""

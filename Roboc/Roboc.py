@@ -39,9 +39,9 @@ if len(pseudo) != 0:
           if joueur.getCarte() != listeCarte[numeroCarte]:
             #Autre carte, on repart point de départ
             joueur.setPosition((0, 0, 0))
-            estSortie, nouvellePosition = carte.changerPositionJoueur(None, joueur.getPosition(), None, None)
+            estSortie, deplacementAutorise, nouvellePosition = carte.changerPositionJoueur(None, joueur.getPosition(), None, None)
           else:
-              estSortie, nouvellePosition = carte.changerPositionJoueur(joueur.getPosition(), joueur.getPosition(), None, None)
+              estSortie, deplacementAutorise, nouvellePosition = carte.changerPositionJoueur(joueur.getPosition(), joueur.getPosition(), None, None)
 
           joueur.setPosition(nouvellePosition)
           joueur.setCarte(listeCarte[numeroCarte])
@@ -55,7 +55,11 @@ if len(pseudo) != 0:
               quitter = deplacement[0]
 
               if str(quitter).lower() != 'q':
-                 estSortie, nouvellePosition = carte.changerPositionJoueur(joueur.getPosition(), None, deplacement[0], deplacement[1])
+                 estSortie, deplacementAutorise, nouvellePosition = carte.changerPositionJoueur(joueur.getPosition(), None, deplacement[0], deplacement[1])
+                 if not deplacementAutorise:
+                    #On ne sait pas déplacer, le déplacement n'est pas valide
+                    utils.affichage.deplacementImpossible()
+
                  joueur.setPosition(nouvellePosition)
 
                  #Sauvegarde de la position
