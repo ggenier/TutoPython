@@ -64,14 +64,14 @@ class Carte:
                     nouvellePosition = anciennePosition
                     #On a trouvé, pas la peine de continuer
                     break
-        #else:
+        else:
             #On recherche le point de départ pour reprendre où on c'est arrêté
-        #    if anciennePosition == nouvellePosition:
-        #        for position in self.structureCarte:
-        #            if self.structureCarte[position[0], position[1], position[2]] == 'X':
-        #                anciennePosition = (position[0], position[1], position[2])
+            if anciennePosition == nouvellePosition:
+                for position in self.structureCarte:
+                    if self.structureCarte[position[0], position[1], position[2]] == 'X':
+                        anciennePosition = (position[0], position[1], position[2])
                         #On a trouvé, pas la peine de continuer
-        #                break
+                        break
 
         #Mise en place de la nouvelle position
         if anciennePosition is not None and nouvellePosition is not None :

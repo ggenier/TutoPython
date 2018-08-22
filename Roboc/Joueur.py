@@ -57,5 +57,5 @@ class Joueur():
         return self.histoPosition
 
     def __str__(self):
-        return "Joueur {}, positionné à l'étage {}, ligne {}, colonne {}. Nombre de coups jouées {}".format(self.pseudo, self.position[0], self.position[1]
-                                                                                 , self.position[2], len(self.histoPosition))
+        return "Joueur {}, positionné à l'étage {}, ligne {}, colonne {}. Nombre de coups jouées {} sur carte {}.".format(self.pseudo, self.position[0], self.position[1]
+                                                                                 , self.position[2], len(self.histoPosition), self.carte)

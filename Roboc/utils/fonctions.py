@@ -67,18 +67,18 @@ def calculerNouvellePosition(positionJoueur, direction, nbDeplacement):
     colonne = positionJoueur[2]
 
     if str(direction).lower() == 'n':
-        ligne-=nbDeplacement
+        ligne-=int(nbDeplacement)
         if ligne < 0:
             ligne = 0
 
     if str(direction).lower() == 's':
-        ligne+=nbDeplacement
+        ligne+=int(nbDeplacement)
 
     if str(direction).lower() == 'e':
-        colonne+=nbDeplacement
+        colonne+=int(nbDeplacement)
 
     if str(direction).lower() == 'o':
-        colonne-=nbDeplacement
+        colonne-=int(nbDeplacement)
         if colonne < 0:
             colonne = 0
 

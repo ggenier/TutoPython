@@ -69,6 +69,9 @@ def affichageStructureCarte(structureCarte):
 
         prevLigne = ligne
 
+    #Affichage de la dernière ligne
+    print(lignePlan.strip())
+
 def saisieDeplacement():
     """Saisie du déplacement a effectué"""
 
