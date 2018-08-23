@@ -17,7 +17,7 @@ def afficherHisto(histo):
     for coups in histo:
         #On saute le coup de départ
         if rang != 0:
-            print("Coups joué {} {} {} {}".format(rang, coups[0], coups[1], coups[2]))
+            print("Coups joué n°{} : {} {} {}".format(rang, coups[0], coups[1], coups[2]))
         rang+=1
 
 def affichageListeCarteEtSaisie(listeCarte):
