@@ -7,7 +7,7 @@ from labyrinthe.Obstacle import Obstacle
 
 class Joueur(Obstacle):
 
-    def __init__(self, pseudo, representation):
+    def __init__(self, pseudo, representation, socket=None, positionJeu=0):
         """Constructeur du joueur"""
         Obstacle.__init__(self, "J", True, str(representation))
         #Pseudo
@@ -24,6 +24,27 @@ class Joueur(Obstacle):
         self.representation = representation
         #L'objet que le joueur à remplacer sur la carte. utilisé pour remettre l'élèment après son déplacement
         self.objetPrecedent=None
+        self.positionJeu=positionJeu #Position dans le jeu-joueur 1, 2...si 0 la partie n'est pas commencé
+        self.nomSocket=socket #Nom de la socket client associée au joueur
+        self.aJouer=False #indique si le joueur  jouer ce tour
+
+    def getAJouer(self):
+        return self.aJouer
+
+    def setAJouer(self, aJouer):
+        self.aJouer = aJouer
+
+    def getSocket(self):
+        return self.nomSocket
+
+    def setSocket(self, socket):
+        self.nomSocket = socket
+
+    def getPositionJeu(self):
+        return self.positionJeu
+
+    def setPositionJeu(self, position):
+        self.positionJeu = position
 
     def getPseudo(self):
         return self.pseudo
@@ -38,12 +59,15 @@ class Joueur(Obstacle):
         """Défini la position du joueur via un tuple(etage, ligne, colonne) et l'objet dont il pris la place"""
         #On se déplace que si on change de position
         if self.position != position:
-            self.position = position
+            self.position = (int(position[0]), int(position[1]), int(position[2]))
             self.histoPosition.append(self.position)
+
+    def setRepresentation(self, representation):
+        self.representation = representation
 
     def getPosition(self):
         """Retourne la position actuelle du joueur"""
-        return self.position
+        return(self.position[0], self.position[1],self.position[2])
 
     def getPositionPrecedente(self):
         """Retourne la position précédente du joueur"""
