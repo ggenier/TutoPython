@@ -26,7 +26,7 @@ class Joueur(Obstacle):
         self.objetPrecedent=None
         self.positionJeu=positionJeu #Position dans le jeu-joueur 1, 2...si 0 la partie n'est pas commencé
         self.nomSocket=socket #Nom de la socket client associée au joueur
-        self.aJouer=False #indique si le joueur  jouer ce tour
+        self.aJouer=False #indique si le joueur  a joué ce tour
 
     def getAJouer(self):
         return self.aJouer

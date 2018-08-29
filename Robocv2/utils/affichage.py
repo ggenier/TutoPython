@@ -2,7 +2,7 @@
 
 """Fonctions de gestion de l'affichage, menu, carte, saisie choix..."""
 
-from labyrinthe.Obstacle import Obstacle
+import utils.fonctions
 
 def saisiePseudo():
     """Saisie du pseudo"""
@@ -22,17 +22,25 @@ def afficherHisto(histo):
             print("Coups joué n°{} : {} {} {}".format(rang, coups[0], coups[1], coups[2]))
         rang+=1
 
-def affichageListeCarteEtSaisie(listeCarte):
+def affichageListeCarteEtSaisie():
     """Affiche la liste des cartes dans un menu, et demande la sélection du joueur.
     Param : Liste des cartes
     Retour Le choix"""
+
+    repertoireCartes = "maps/*"
+
+    # Chargement des cartes dispo
+    listeCarte = utils.fonctions.getListeCartes(repertoireCartes)
+
     print("Labyrinthes existants :")
     touche=1 #Touche à saisir dans le menu
+    listeNomCarte=list()
     for carte in listeCarte:
         carteTemp = str(carte).split("\\")
         carteTemp = carteTemp[1].replace(".txt","")
         carte = carteTemp
         print("\t {} - {}.".format(touche, carte))
+        listeNomCarte.append(carteTemp)
         touche+=1
 
     retour=str()
@@ -55,6 +63,9 @@ def affichageListeCarteEtSaisie(listeCarte):
             #On souhaite quitter
             retour = choix
             saisieValide = False
+
+    if saisieValide:
+        choix = listeNomCarte[choix]
 
     return choix
 
@@ -96,9 +107,19 @@ def saisieDeplacement():
 
     while deplacement.upper() != 'Q' and not saisieValide:
         deplacement = input("> ")
-        #Le déplacement doit cmmencer par une direction
-        if deplacement.startswith(("n", "s", "e", "o")):
-            direction = deplacement[0]
+        saisieValide, direction, nombreDeplacement = controleSaisieDirection(deplacement)
+
+    return (direction, nombreDeplacement)
+
+def controleSaisieDirection(deplacement):
+    saisieValide = True
+    direction=str()
+    nombreDeplacement=str()
+
+    # Le déplacement doit cmmencer par une direction ou  m pour mur et p pour porte
+    if deplacement.startswith(("n", "s", "e", "o", "m", "p")):
+        direction = deplacement[0]
+        if direction in "nseo":
             if len(deplacement) > 1:
                 nombreDeplacement = deplacement[1:len(deplacement)]
                 if not nombreDeplacement.isnumeric():
@@ -108,13 +129,31 @@ def saisieDeplacement():
                 else:
                     saisieValide = True
             else:
+                nombreDeplacement=str(1)
                 saisieValide = True
-        else:
-            if deplacement.isalpha() and deplacement.upper() == 'Q':
-                saisieValide = False
-                direction = 'Q'
+
+        if direction in "mp":
+            if len(deplacement) > 1:
+                nombreDeplacement = direction
+                direction = deplacement[1]
+                if not direction.isalpha():
+                    print(
+                        "Indiquez une direction pour construire ou détruire un mur")
+                    saisieValide = False
+                else:
+                    if direction not in "nseo":
+                        print(
+                            "Indiquez une direction pour construire ou détruire un mur")
+                        saisieValide = False
+                    else:
+                        saisieValide = True
             else:
                 print(
-                    "Le déplacement doit commencer par une direction : (n)ord, (s)ud, (e)st, (o)est, ou (Q)uitter.\n Il est possible d'ajouter un nombre de déplacement (facultatif)")
+                    "Indiquez une direction pour construire ou détruire un mur")
+                saisieValide = False
+    else:
+        print(
+            "Le déplacement doit commencer par une direction : (n)ord, (s)ud, (e)st, (o)est o une des ations (m)ur, (p)orte et une direction.\n Il est possible d'ajouter un nombre de déplacement (facultatif)")
+        saisieValide = False
 
-    return (direction, nombreDeplacement)
+    return saisieValide, direction, nombreDeplacement

@@ -36,12 +36,4 @@ class testFonctions(unittest.TestCase):
         message = "DEPXggenier(1,2,3)"
         self.assertEqual(utils.fonctions.decomposeMessageAction(message), "Xggenier(1,2,3)")
 
-    def testDecomposeMessageCreationObstacle(self):
-        """Decompose le reste du message reçu er retourne les données utiles"""
-        message = "Xm)"
-        representation, direction, positions = utils.fonctions.decomposeMessageObstacle(message)
-
-        self.assertEqual(representation, "X")
-        self.assertEqual(directions, "m")
-
 unittest.main()

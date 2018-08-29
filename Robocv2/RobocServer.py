@@ -3,6 +3,7 @@
 import socket
 import select
 import utils.fonctions
+import utils.affichage
 from Joueur import Joueur
 from labyrinthe.Carte import Carte
 import time
@@ -13,6 +14,7 @@ listeClientConnu = dict()
 mapChoisie = False
 premierClient = None #Premier client connecté
 partieFinie = False
+partieCommence=False
 
 def configurationServer(host='localhost', port=8888):
     """Configuration du serveur"""
@@ -28,7 +30,7 @@ def configurationServer(host='localhost', port=8888):
 
 def envoiMessage(socketAvecClient, messageAEnvoyer):
     """Envoi d'un mesasge vers le client"""
-    #print("Envoi message : "+messageAEnvoyer)
+    print("Envoi message : "+messageAEnvoyer)
     socketAvecClient.send(messageAEnvoyer.encode())
     time.sleep(0.1)
 
@@ -37,11 +39,38 @@ def receptionMessage(socketAvecClient):
     """Réception du message"""
     message = socketAvecClient.recv(1024)
     message = message.decode()
+    print("Message reçu : "+message)
     return message
 
+def joueurDoitJouer(client):
+    """On recherche si le joueur doit jouer ou pas"""
+    joueurDoitJouer = False
+
+    #On parcourt la liste des client
+    for clientACtrl in listeClientConnu:
+        joueur = listeClientConnu[clientACtrl]
+        #On cherche le premier joueur qui n'a pas joué
+        if not joueur.getAJouer():
+            break
+
+    joueur2 = listeClientConnu[client]
+    #si le premier joueur qui n'a pas joué et le même que celui qui nous envoie le message
+    #On autorise le mouvement
+    if joueur == joueur2:
+        joueurDoitJouer = True
+
+    return joueurDoitJouer
+
+#Sélection de la map avant le lancement du serveur
+carteSelectionnee = utils.affichage.affichageListeCarteEtSaisie()
+
+#Sélection de la carte
+carte = Carte("maps/" + carteSelectionnee + ".txt")
+carte.analyseCarte()
+mapChoisie = True
 
 connection = configurationServer()
-print("Lancment du server, attente de connection client")
+print("Lancement du server, attente de connection client")
 while serveurLance:
     # On vérifie les demandes de connections
     listeConnectionsDemandees, wlist, xlist = select.select([connection], [], [], 0.05)
@@ -69,69 +98,41 @@ while serveurLance:
 
             #Création du joueur
             if action == "ADD":
-                if client not in listeClientConnu:
-                    pseudo = utils.fonctions.decomposeMessageAction(messageRecu)
-                    print("\tAjout d'un joueur {}".format(pseudo))
-                    joueur = Joueur(pseudo, utils.fonctions.choisirLettreJoueur(), client, len(listeClientConnu)+1)
-                    # Envoi de la position de joueur dans le tour
-                    envoiMessage(client, "POS" + str(joueur.getRepresentation()) + str(joueur.getPositionJeu()))
-
-                    #Le premier client choisi la map
-                    if len(listeClientConnu) == 0 and not mapChoisie:
-                        print("\tDemande de sélection de la map")
-                        envoiMessage(client, "SAI")#saisie de la map
-                        premierClient = client
-
-                    if mapChoisie:
-                        print("\tEnvoi de la carte sélectionné au client qui vient de se connecter")
-                        envoiMessage(client, "MAP"+carteSelectionnee)
-                        #On positionne les joueurs déjà connectés
-                        trouve, etage, ligne, colonne = carte.rechercheEmplacementLibre()
-                        # Debut de partie, on déplace le joueur
-                        joueur.setPosition((etage, ligne, colonne))
-                        NouvelObstacle = carte.getObstacle(joueur.getPosition())
-                        obstacleARemettre = joueur.getObjetPrecedent()
-                        joueur.setObjetPrecedent(NouvelObstacle)
-                        carte.positionnerJoueur(joueur)
-                        listeClientConnu[client] = joueur
-
-                    # Si on ne connait pas le client, on l'ajoute
+                if partieCommence:
+                    envoiMessage(client, "PCO") #Partie déjà commencé, impossible de rejoindre
+                else:
                     if client not in listeClientConnu:
-                        listeClientConnu[client] = joueur
+                        pseudo = utils.fonctions.decomposeMessageAction(messageRecu)
+                        print("\tAjout d'un joueur {}".format(pseudo))
+                        joueur = Joueur(pseudo, utils.fonctions.choisirLettreJoueur(), client, len(listeClientConnu)+1)
+                        # Envoi de la position de joueur dans le tour
+                        envoiMessage(client, "POS" + str(joueur.getRepresentation()) + str(joueur.getPositionJeu()))
 
-            #Sélection de la map
-            if action == "MAP":
-                print("\tRetour map sélectionnée")
-                #Retour de la map sélectionnée
-                #Création de la map
-                carteSelectionnee = utils.fonctions.decomposeMessageAction(messageRecu)
-                #On crée la carte
-                carte = Carte("maps/"+carteSelectionnee+".txt")
-                carte.analyseCarte()
+                        if mapChoisie:
+                            print("\tEnvoi de la carte sélectionné au client qui vient de se connecter")
+                            envoiMessage(client, "MAP"+carteSelectionnee)
+                            #On positionne les joueurs déjà connectés
+                            trouve, etage, ligne, colonne = carte.rechercheEmplacementLibre()
+                            # Debut de partie, on déplace le joueur
+                            joueur.setPosition((etage, ligne, colonne))
+                            NouvelObstacle = carte.getObstacle(joueur.getPosition())
+                            obstacleARemettre = joueur.getObjetPrecedent()
+                            joueur.setObjetPrecedent(NouvelObstacle)
+                            carte.positionnerJoueur(joueur)
+                            listeClientConnu[client] = joueur
 
-                #On informe les autres joueurs que la carte est sélectionné et on les place
-                print("\tEnvoi de la map sélectionnée aux clients connectés")
-                for clientEnvoi in listeClientConnu:
-                    if clientEnvoi is not premierClient:
-                        envoiMessage(clientEnvoi, "MAP_" + carteSelectionnee)
+                        if premierClient == None:
+                            premierClient = client
+                            envoiMessage(client, "SAI")
 
-                for clientEnvoi in listeClientConnu:
-                    joueur = listeClientConnu[clientEnvoi]
-                    #On positionne les joueurs déjà connectés
-                    trouve, etage, ligne, colonne = carte.rechercheEmplacementLibre()
-                    # Debut de partie, on déplace le joueur
-                    joueur.setPosition((etage, ligne, colonne))
-                    NouvelObstacle = carte.getObstacle(joueur.getPosition())
-                    obstacleARemettre = joueur.getObjetPrecedent()
-                    joueur.setObjetPrecedent(NouvelObstacle)
-                    carte.positionnerJoueur(joueur)
-                    listeClientConnu[clientEnvoi] = joueur
-
-                mapChoisie=True
+                        # Si on ne connait pas le client, on l'ajoute
+                        if client not in listeClientConnu:
+                            listeClientConnu[client] = joueur
 
             #Début de partie
             if action == "DEB":
                 print("\tDébut de partie")
+                partieCommence=True
                 #Chaque joueur va positionner les autres joueurs, lui inclus
                 for clientEnvoi in listeClientConnu:
                     envoiMessage(clientEnvoi, "INI")  # Init de la carte
@@ -150,13 +151,17 @@ while serveurLance:
 
                 #On envoit la demande de déplacement
                 tousLesJoueursOntJoue = True
+                demandeJouerEnvoyee = False
                 for clientAEnvoyer in listeClientConnu:
                     joueur = listeClientConnu[clientAEnvoyer]
                     #Si le joueur n'a pas joué
-                    if not joueur.getAJouer():
+                    if not joueur.getAJouer() and not demandeJouerEnvoyee:
+                        demandeJouerEnvoyee = True
                         envoiMessage(clientAEnvoyer, "ACT")
                         tousLesJoueursOntJoue = False
-                        break
+                        #break
+                    else:
+                        envoiMessage(clientAEnvoyer, "ATT")
 
                 if tousLesJoueursOntJoue:
                     for clientAEnvoyer in listeClientConnu:
@@ -222,25 +227,29 @@ while serveurLance:
             if action == "CTR":
                 suiteMessage = utils.fonctions.decomposeMessageAction(messageRecu)
 
-                lettre = suiteMessage[0]
-                direction = suiteMessage[1]
-                nbDeplacement = int(suiteMessage[2:len(suiteMessage)])
-                joueur = listeClientConnu[client]
+                #On contrôle que c'est bien à ce joueur de joueur
+                if joueurDoitJouer(client):
+                    lettre = suiteMessage[0]
+                    direction = suiteMessage[1]
+                    nbDeplacement = int(suiteMessage[2:len(suiteMessage)])
+                    joueur = listeClientConnu[client]
 
-                deplacementAutorise, partieFinie, etage, ligne, colonne = carte.deplacementAutorise(joueur.getPosition(), direction, nbDeplacement)
+                    deplacementAutorise, partieFinie, etage, ligne, colonne = carte.deplacementAutorise(joueur.getPosition(), direction, nbDeplacement)
 
-                joueur.setPosition((etage, ligne, colonne))
-                # On sauvegarde l'ancien objet si non nul
-                NouvelObstacle = carte.getObstacle(joueur.getPosition())
-                # On récupère l'ancien objet du joueur
-                obstacleARemettre = joueur.getObjetPrecedent()
-                joueur.setObjetPrecedent(NouvelObstacle)
-                carte.setObstacle(obstacleARemettre)
-                carte.positionnerJoueur(joueur)
-                listeClientConnu[client] = joueur
+                    joueur.setPosition((etage, ligne, colonne))
+                    # On sauvegarde l'ancien objet si non nul
+                    NouvelObstacle = carte.getObstacle(joueur.getPosition())
+                    # On récupère l'ancien objet du joueur
+                    obstacleARemettre = joueur.getObjetPrecedent()
+                    joueur.setObjetPrecedent(NouvelObstacle)
+                    carte.setObstacle(obstacleARemettre)
+                    carte.positionnerJoueur(joueur)
+                    listeClientConnu[client] = joueur
 
-                #on indique que le déplacement est OK, et on re recevra un message de déplacement à propager
-                envoiMessage(client, "DOK"+joueur.getRepresentation()+joueur.getPseudo()+str(joueur.getPosition()))
+                    #on indique que le déplacement est OK, et on re recevra un message de déplacement à propager
+                    envoiMessage(client, "DOK"+joueur.getRepresentation()+joueur.getPseudo()+str(joueur.getPosition()))
+                else:
+                    envoiMessage(client, "PJO") #Ce n'est pas au joueur de jouer
 
             if action == "MUR":
                 #Création d'un mur
@@ -324,5 +333,18 @@ while serveurLance:
 
             if action == "QUI":
                 serveurLance = False
+
+            if action == "MSG":
+                token = suiteAction.split("@")
+                pseudoEnvoi = token[0]
+                pseudoDestinataire = token[1]
+                message = token[2]
+
+                #On cherche le destinataire dans la liste, et envoit le message
+                for client in listeClientConnu:
+                    joueur = listeClientConnu[client]
+                    if joueur.getPseudo() == pseudoDestinataire:
+                        envoiMessage(client, "MSG"+pseudoEnvoi+"@"+message)
+                        break
 
 connection.close()

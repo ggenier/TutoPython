@@ -24,7 +24,7 @@ def ouvertureSocket(machineDistante='localhost', port=8888):
 def recevoirMessage():
     message=maConnec.recv(1024)
     message=message.decode()
-    print("Message reçu : "+message)
+    #print("Message reçu : "+message)
     return message
 
 def envoiMessage(message):
@@ -52,16 +52,9 @@ while message != "quitter" and message != 'fin':
 
         #Saisie de la carte à jouer
         if action == "SAI":
-            mapSelect = utils.affichage.affichageListeCarteEtSaisie()
-            envoiMessage("MAP"+mapSelect)
             action=input("Taper sur entrer pour commencer la partie.")
             #On reste bloqué t'en qu'on a pas taper sur entré
             envoiMessage("DEB")
-
-        #On attend qu'un joueur joue
-        #if action == 'ATT':
-            #utils.affichage.affichageStructureCarte(carte.getStructureCarte())
-            #print("En attente du lancement de la partie...")
 
         #Mise en place du joueur sur la carte
         if action == 'POS':
@@ -110,7 +103,6 @@ while message != "quitter" and message != 'fin':
                 carte.analyseCarte()
 
             if not partieFinie:
-                #utils.affichage.affichageStructureCarte(carte.getStructureCarte())
                 direction, nbDeplacement = utils.affichage.saisieDeplacement()
 
                 #Déplement du robot
@@ -158,9 +150,7 @@ while message != "quitter" and message != 'fin':
             representation, pseudo, positions = utils.fonctions.decomposeMessageDeplacement(suite_action)
             joueurTempo = Joueur(pseudo, representation, None, 0)
             joueurTempo.setPosition(positions)
-            print(representation+" -"+ pseudo+" - "+ str(positions))
             carte.positionnerJoueur(joueurTempo)
-            #utils.affichage.affichageStructureCarte(carte.getStructureCarte())
 
         #Rafracihissement de la carte
         if action == "RAF":
@@ -199,7 +189,7 @@ while message != "quitter" and message != 'fin':
             suite_action = suite_action.split(",")
 
             carte.setObstacle(None, ".", (int(suite_action[0]), int(suite_action[1]), int(suite_action[2])))
-            #utils.affichage.affichageStructureCarte(carte.getStructureCarte())
+            utils.affichage.affichageStructureCarte(carte.getStructureCarte())
 
         if action == "CKO":
             print("Création d'un mur impossible ici.")
