@@ -5,26 +5,36 @@ from django.db import models
 
 #Tables
 class Artist(models.Model):
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField("nom de l'artiste",max_length=200, unique=True)
+
+    def __str__(self):
+        return self.name
 
 class Contact(models.Model):
     email = models.EmailField("email", max_length=100, unique=True)
     name = models.CharField("nom de l'utilisateur", max_length=200)
 
+    def __str__(self):
+        return self.name
+
+
 class Album(models.Model):
     reference = models.IntegerField("référence de l'album", max_length=200, unique=True)
-    created_at = models.DateTimeField("date de création", auto_new_add=True)
+    created_at = models.DateTimeField("date de création", auto_now_add=True)
     available = models.BooleanField("disponible à la réservation", default=True)
-    titre = models.CharField("titre de l'album", max_length=200)
-    picture = models.UrlField("image de la pochette")
+    title = models.CharField("titre de l'album", max_length=200)
+    picture = models.URLField("image de la pochette")
     artist = models.ManyToManyField(Artist, related_name='album', blank=True)
 
-class Booking(models.Model):
-    created_at = models.DateTimeField("date de création", auto_new_add=True)
-    contacted = models.BooleanField("client contacté pour la réservation", default=True)
-    contact = models.ForeignKey("identifiant contact ayant fait la réservation", Contact)
-    album = models.OneToOneField("identifiant album réservé", Album)
+    def __str__(self):
+        return self.title
 
-class Artiste(models.Model):
-    name = models.CharField("nom de l'artiste", max_length=60)
+class Booking(models.Model):
+    created_at = models.DateTimeField("date de création", auto_now_add=True)
+    contacted = models.BooleanField("client contacté pour la réservation", default=True)
+    contact = models.ForeignKey(Contact, on_delete=models.CASCADE)
+    album = models.OneToOneField(Album, on_delete=models.CASCADE,)
+
+    def __str__(self):
+        return self.contact.name
 
