@@ -19,6 +19,16 @@ print("moi2 est une instance de AgentSpecial : "+str(isinstance(moi2, Personne))
 print("Personne hérite de AgentSpecial : "+str(issubclass(Personne, AgentSpecial)))
 print("AgentSpecial hérite de AgentSpecial : "+str(issubclass(AgentSpecial, Personne)))
 
-status = 100
-if status != 0:
-    raise MonException("select bkcom", status)
+listePersonne=list()
+listePersonne.append(moi)
+print("print(listePersonne[0]) "+str(listePersonne[0]))
+quelquun = listePersonne[0]
+quelquun.nom="TOTO"
+print("print(listePersonne[0]) "+str(listePersonne[0]))
+
+moi3=moi
+listePersonne.append(moi3)
+print("2 print(listePersonne[1]) "+str(listePersonne[1]))
+moi3.nom="TUTU"
+print("2 print(listePersonne[1]) "+str(listePersonne[1]))
+print("2 print(listePersonne[0]) "+str(listePersonne[0]))

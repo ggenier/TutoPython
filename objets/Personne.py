@@ -9,5 +9,5 @@ class Personne:
         self.adresse = adresse
 
     def __str__(self):
-        return "{} {}, age {}, adresse {}".format(self.nom, self.nom, self.age, self.adresse)
+        return "{} {}, age {}, adresse {}".format(self.nom, self.prenom, self.age, self.adresse)
 
