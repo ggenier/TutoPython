@@ -1,5 +1,5 @@
 from .models import Album, Artist, Contact, Booking
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 # Create your views here.
 #Version pour HTML simple
@@ -16,6 +16,7 @@ def index(request):
     context = {
         'albums': albums
     }
+
     return render(request, 'store/index.html', context)
 
 #Version pour la version HTML simple
@@ -43,7 +44,7 @@ def listing(request):
 
 #Version pour utilisation template
 def detail(request, album_id):
-    album = Album.objects.get(pk=album_id)
+    album = get_object_or_404(Album, pk=album_id)
     artists = [artist.name for artist in album.artist.all()]
     artists_name = " ".join(artists)
     context = {
