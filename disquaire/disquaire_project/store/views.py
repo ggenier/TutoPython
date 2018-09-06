@@ -3,12 +3,22 @@ from .models import Album, Artist, Contact, Booking
 from django.template import loader
 
 # Create your views here.
+#Version pour HTML simple
+# def index(request):
+#     albums = Album.objects.filter(available=True).order_by('-created_at')[:12]
+#     formatted_albums = ["<li>{} - {}</li>".format(str(album.id), album.title) for album in albums]
+#     message = """<u1>{}</u1>""".format("\n".join(formatted_albums))
+#     template = loader.get_template('store/index.html')
+#     return HttpResponse(template.render(request=request))
+
+#Version pour utilisation gabarit
 def index(request):
     albums = Album.objects.filter(available=True).order_by('-created_at')[:12]
-    formatted_albums = ["<li>{} - {}</li>".format(str(album.id), album.title) for album in albums]
-    message = """<u1>{}</u1>""".format("\n".join(formatted_albums))
     template = loader.get_template('store/index.html')
-    return HttpResponse(template.render(request=request))
+    context = {
+        'albums': albums
+    }
+    return HttpResponse(template.render(context, request=request))
 
 def listing(request):
     albums = Album.objects.filter(available=True).order_by('-created_at')
