@@ -77,6 +77,7 @@ def detail(request, album_id):
 
     if request.method == "POST":
         form = ContactForm(request.POST, error_class=ParagraphErrorList)
+
         if form.is_valid():
             #email = request.POST.get("email")
             #name = request.POST.get("name")
@@ -84,6 +85,7 @@ def detail(request, album_id):
             #Avec le controles de erreurs, on ne prend pas driectement dans le POST mais dans un dictionnaire
             email = form.cleaned_data['email']
             name  = form.cleaned_data['name']
+            print("toto")
 
             try:
                 with transaction.atomic(): #On peut aussi faire de la transaction au cas par cas avec with
