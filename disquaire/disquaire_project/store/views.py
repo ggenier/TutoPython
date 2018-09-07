@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from .forms import ContactForm
 from .forms import ParagraphErrorList
+from django.db import transaction, IntegrityError
 
 # Create your views here.
 #Version pour HTML simple
@@ -14,6 +15,7 @@ from .forms import ParagraphErrorList
 #     return HttpResponse(template.render(request=request))
 
 #Version pour utilisation gabarit
+@transaction.non_atomic_requests #N'a pas besoin d'être dans une transaction
 def index(request):
     albums = Album.objects.filter(available=True).order_by('-created_at')[:12]
     context = {
@@ -61,6 +63,7 @@ def listing(request):
 #     return HttpResponse(message)
 
 #Version pour utilisation template
+@transaction.atomic #A besoin d'une transaction
 def detail(request, album_id):
     album = get_object_or_404(Album, pk=album_id)
     artists = [artist.name for artist in album.artist.all()]
@@ -82,26 +85,37 @@ def detail(request, album_id):
             email = form.cleaned_data['email']
             name  = form.cleaned_data['name']
 
-            contact = Contact.objects.filter(email=email)
-            if not contact.exists():
-                #On crée le nuveau contact
-                contact = Contact.objects.create(email=email, name=name)
+            try:
+                with transaction.atomic(): #On peut aussi faire de la transaction au cas par cas avec with
+                    contact = Contact.objects.filter(email=email)
+                    if not contact.exists():
+                        #On crée le nouveau contact
+                        contact = Contact.objects.create(email=email, name=name)
+                    else:
+                        #Le contact existe déjà mais est dans un QuerySet, on doit donc prendre le permier
+                        #pour avoir le même type que l'on crée ou que l'on trouve le contact
+                        contact = contact.first()
 
-            booking = Booking.objects.create(contact=contact, album=album)
+                    booking = Booking.objects.create(contact=contact, album=album)
 
-            album.available = False
-            album.save()
-            context = {'album_title' : album.title}
+                    album.available = False
+                    album.save()
+                    context = {'album_title' : album.title}
 
-            return render(request, 'store/merci.html', context)
-        else:
+                    return render(request, 'store/merci.html', context)
+            except IntegrityError:
+                form.errors['internal'] = "Une erreur interne est apparue. Merci de recommencer votre requête."
+
+        #else:
             #Il y a des erreurs dans le formulaire, on ajoute les erreurs au context
-            context['errors'] = form.errors.items()
-            context['form'] = form
+            # context['errors'] = form.errors.items()
+            # context['form'] = form
     else:
         #Creation du formulaire
         form = ContactForm()
-        context['form'] = form
+
+    context['form'] = form
+    context['errors'] = form.errors.items()
 
     return render(request, 'store/detail.html', context)
 

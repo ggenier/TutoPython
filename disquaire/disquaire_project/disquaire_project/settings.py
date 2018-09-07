@@ -86,6 +86,7 @@ DATABASES = {
         'PASSWORD': 'x6cTrdq5@',
         'HOST': '',
         'PORT': '5432',
+        'ATOMIC_REQUESTS' : True, #Gestion des transactions par défaut, chaque route est une transaction
     }
 }
 
