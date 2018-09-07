@@ -22,11 +22,11 @@
   <form class="form-inline" action="{% url 'store:detail' album_id=album_id %}" method="post">
     {% csrf_token %}
     <div class="form-group {% if form.name.errors %}has-warning has-feedback{% endif %}">
-      <label for="{{ form.name.id_for_label }}">
+      <label for="{{ form.name.id_for_label }}" class="control-label">Nom</label>
       {{ form.name }}
     </div>
     <div class="form-group {% if form.email.errors %}has-warning has-feedback{% endif %}">
-      <label for="{{ form.email.id_for_label }}">
+      <label for="{{ form.email.id_for_label }}" class="control-label">Email</label>
       {{ form.email }}
     </div>
     <!-- <input type="hidden" class="hidden" value="" name="album_id"> -->
